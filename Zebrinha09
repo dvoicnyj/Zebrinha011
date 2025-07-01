@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TERMINAL DE ACESSO / HACKERS VS CRACKERS</title>
+    <style>
+        /* Estilos do Terminal de Acesso */
+        body {
+            background-color: #000;
+            color: #00FF41;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 16px;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Controlado pelo JS quando necessário */
+        }
+
+        #matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .main-container {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-shadow: 0 0 5px #00FF41, 0 0 10px #00FF41;
+        }
+        
+        .login-form, .intermediate-screen, #camera-feed-container {
+            border: 2px solid #00FF41;
+            padding: 25px;
+            background-color: rgba(0, 20, 0, 0.5);
+            box-shadow: 0 0 15px #00FF41 inset;
+            width: 80%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; }
+        input[type="text"], input[type="number"] {
+            background-color: transparent;
+            border: none;
+            border-bottom: 1px solid #00FF41;
+            color: #00FF41;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1em;
+            width: 100%;
+            padding: 5px 0;
+            text-shadow: 0 0 5px #00FF41;
+        }
+        input:focus {
+            outline: none;
+            border-bottom: 2px solid #33FF66;
+            box-shadow: 0 5px 15px rgba(0, 255, 65, 0.2);
+        }
+        .cursor {
+            display: inline-block;
+            background-color: #00FF41;
+            width: 10px;
+            height: 1.2em;
+            animation: blink 1s step-end infinite;
+            margin-left: 5px;
+        }
+        @keyframes blink { from, to { background-color: transparent; } 50% { background-color: #00FF41; } }
+
+        .binary-face {
+            position: fixed;
+            font-family: 'Courier New', Courier, monospace;
+            color: #00FF41;
+            font-size: 10px;
+            white-space: pre;
+            opacity: 0.6;
+            text-shadow: 0 0 8px #00FF41;
+            z-index: 10;
+        }
+        #top-left { top: 10px; left: 10px; }
+        #top-right { top: 10px; right: 10px; text-align: right; }
+        #bottom-left { bottom: 10px; left: 10px; }
+        #bottom-right { bottom: 10px; right: 10px; text-align: right; }
+        
+        h1 {
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            margin-bottom: 30px;
+            font-size: 1.5em;
+        }
+
+        #camera-feed-container {
+            display: none;
+            border: 2px solid #00FF41;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            box-shadow: 0 0 25px #FF0000, 0 0 15px #00FF41 inset;
+            width: 90%;
+            max-width: 800px;
+            text-align: center;
+            flex-direction: column; /* Para alinhar o conteúdo */
+            justify-content: center;
+            align-items: center;
+        }
+        #camera-feed-container h1 { color: #FF0000; text-shadow: 0 0 10px #FF0000; }
+        #camera-image {
+            width: 100%;
+            max-height: 500px;
+            object-fit: cover;
+            border: 1px solid #00FF41;
+            margin-top: 15px;
+            position: relative;
+            background-image: linear-gradient(rgba(0,0,0,0.3) 50%, transparent 50%);
+            background-size: 100% 4px;
+        }
+        .rec-indicator {
+            color: red;
+            font-weight: bold;
+            animation: rec-blink 1.5s infinite;
+        }
+        @keyframes rec-blink { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
+
+        .intermediate-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .intermediate-screen p { margin-bottom: 15px; font-size: 1.2em; }
+        .intermediate-screen a {
+            color: #00FF41;
+            text-decoration: none;
+            border: 1px solid #00FF41;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+            text-shadow: 0 0 5px #00FF41;
+            margin-top: 20px;
+            display: inline-block;
+        }
+        .intermediate-screen a:hover {
+            background-color: #00FF41;
+            color: #000;
+            box-shadow: 0 0 15px #00FF41;
+        }
+        #continue-button, #go-to-hackers-page-button { /* Adicionado ID para o novo botão */
+            background-color: transparent;
+            color: #00FF41;
+            border: 2px solid #00FF41;
+            padding: 10px 20px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.1em;
+            cursor: pointer;
+            text-shadow: 0 0 5px #00FF41;
+            transition: all 0.3s ease;
+            margin-top: 30px;
+        }
+        #continue-button:hover, #go-to-hackers-page-button:hover {
+            background-color: #00FF41;
+            color: #000;
+            box-shadow: 0 0 15px #00FF41;
+        }
+
+        /* --- Estilos da Página Hackers vs Crackers --- */
+        #hackers-crackers-page {
+            display: none; /* Começa escondido */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            color: #00ff00;
+            font-family: 'Share Tech Mono', monospace;
+            overflow-y: auto; /* Permite scroll se o conteúdo for grande */
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: 20; /* Garante que fique por cima de tudo */
+        }
+
+        #hackers-crackers-page .content {
+            position: relative; /* Ajustado para dentro da div pai */
+            top: initial;
+            left: initial;
+            transform: none;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            width: 90%;
+            max-width: 800px;
+            border: 1px solid #00ff00;
+            border-radius: 10px;
+            text-align: left;
+            text-shadow: 0 0 5px #00ff00;
+            box-sizing: border-box;
+            margin: 50px auto; /* Centraliza e adiciona margem */
+        }
+
+        #hackers-crackers-page h1, #hackers-crackers-page h2 {
+            color: #00ff00;
+            animation: glitch 1s infinite alternate;
+            font-size: 1.5em;
+        }
+
+        #hackers-crackers-page p, #hackers-crackers-page ul {
+            font-size: 1em;
+            line-height: 1.4em;
+        }
+
+        #hackers-crackers-page ul { padding-left: 20px; }
+
+        .exemplo {
+            border-left: 4px solid #00ff00;
+            padding-left: 10px;
+            margin-top: 10px;
+            background: rgba(0, 255, 0, 0.1);
+        }
+
+        @keyframes glitch {
+            0% { text-shadow: 2px 0 red, -2px 0 blue; }
+            25% { text-shadow: -2px 0 red, 2px 0 blue; }
+            50% { text-shadow: 2px 2px red, -2px -2px blue; }
+            75% { text-shadow: -2px -2px red, 2px 2px blue; }
+            100% { text-shadow: 0 0 5px #00ff00; }
+        }
+
+        /* Ajustes para dispositivos móveis */
+        @media (max-width: 600px) {
+            #hackers-crackers-page .content { padding: 15px; }
+            #hackers-crackers-page h1 { font-size: 1.2em; }
+            #hackers-crackers-page h2 { font-size: 1em; }
+            #hackers-crackers-page p, #hackers-crackers-page ul { font-size: 0.9em; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="matrix-bg"></canvas>
+
+    <div id="top-left" class="binary-face"></div>
+    <div id="top-right" class="binary-face"></div>
+    <div id="bottom-left" class="binary-face"></div>
+    <div id="bottom-right" class="binary-face"></div>
+
+    <div class="main-container" id="terminal-container">
+        <div class="login-form" id="login-section">
+            <h1>[ Acesso Restrito ]</h1>
+            <div class="form-group">
+                <label for="name">> INFORME SEU NOME:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="age">> INFORME SUA IDADE:</label>
+                <input type="number" id="age" name="age" required>
+            </div>
+            <div class="form-group">
+                <label for="room">> INFORME SUA SALA:</label>
+                <input type="text" id="room" name="room" required>
+            </div>
+            <label for="submit-button">> PRESSIONE ENTER PARA CONTINUAR<span class="cursor"></span></label>
+        </div>
+
+        <div class="intermediate-screen" id="intermediate-section">
+            <h1>[ Processando Dados ]</h1>
+            <p>EI <span id="display-name"></span>, VOCÊ JÁ TEM <span id="display-age"></span>! INTERESSANTE...</p>
+            <p>QUER SABER COMO EU TE VEJO?</p>
+            <p>OU TALVEZ DAR UMA OLHADA EM SUA SALA <span id="display-room"></span>?</p>
+            <button id="continue-button">CLIQUE AQUI PARA DESCOBRIR</button>
+            <button id="go-to-hackers-page-button" style="margin-top: 20px;">Ou vá para a página sobre Hackers vs Crackers</button>
+        </div>
+
+        <div id="camera-feed-container">
+            <h1>Eu te vejo</h1>
+            <p><span class="rec-indicator">● REC</span> | CÂMERA 01 | STATUS: ONLINE</p>
+            <img id="camera-image" src="" alt="Camera Feed">
+            <button id="back-to-intermediate-button" style="margin-top: 20px;">Voltar</button>
+            <button id="go-to-hackers-page-from-camera" style="margin-top: 20px;">Ir para Hackers vs Crackers</button>
+        </div>
+    </div>
+
+    <div id="hackers-crackers-page">
+        <div class="content">
+            <h1>Hackers vs Crackers</h1>
+
+            <h2>O que são Hackers?</h2>
+            <p>Hackers são especialistas em tecnologia que usam seus conhecimentos para entender, melhorar e, muitas vezes, proteger sistemas de computação.</p>
+            <ul>
+                <li>Identificam falhas de segurança</li>
+                <li>Ajudam a fortalecer sistemas</li>
+                <li>Podem trabalhar como profissionais éticos (Hackers Éticos)</li>
+            </ul>
+            <div class="exemplo">
+                <strong>Exemplo:</strong> Um hacker ético pode ser contratado para testar a segurança de uma empresa.
+            </div>
+
+            <h2>O que são Crackers?</h2>
+            <p>Crackers possuem habilidades técnicas semelhantes, mas as usam para fins prejudiciais, como invadir sistemas ou quebrar proteções de software.</p>
+            <ul>
+                <li>Invadem sistemas ilegalmente</li>
+                <li>Espalham vírus e malware</li>
+                <li>Quebram softwares para uso ou distribuição ilegal</li>
+            </ul>
+            <div class="exemplo">
+                <strong>Exemplo:</strong> Um cracker pode quebrar a proteção de um software pago e distribuí-lo gratuitamente de forma ilegal.
+            </div>
+
+            <h2>Resumo Final</h2>
+            <p>✅ <strong>Hacker:</strong> Usa o conhecimento para o bem, protegendo ou melhorando sistemas.</p>
+            <p>⚠️ <strong>Cracker:</strong> Usa o conhecimento para prejudicar, roubar ou comprometer sistemas.</p>
+            <button id="back-to-terminal-button" style="margin-top: 30px;">Voltar ao Terminal</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Script para o Efeito Matrix (compartilhado) ---
+        const canvas = document.getElementById('matrix-bg');
+        const ctx = canvas.getContext('2d');
+        let matrixFontSize = 12; // Tamanho de fonte padrão
+
+        function resizeMatrixCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            matrixFontSize = window.innerWidth < 600 ? 10 : 12; // Ajuste para mobile
+            initMatrixDrops();
+        }
+
+        const letters = '01';
+        let columns;
+        let drops = [];
+
+        function initMatrixDrops() {
+            columns = canvas.width / matrixFontSize;
+            drops = [];
+            for (let i = 0; i < columns; i++) drops[i] = 1;
+        }
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#00FF41';
+            ctx.font = matrixFontSize + 'px monospace';
+            for (let i = 0; i < drops.length; i++) {
+                const text = letters.charAt(Math.floor(Math.random() * letters.length));
+                ctx.fillText(text, i * matrixFontSize, drops[i] * matrixFontSize);
+                if (drops[i] * matrixFontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            }
+        }
+
+        window.addEventListener('resize', resizeMatrixCanvas);
+        resizeMatrixCanvas(); // Inicializa o canvas Matrix no carregamento
+        setInterval(drawMatrix, 40); // Intervalo do Matrix
+
+        // --- Script para os Rostos Binários (sem alterações) ---
+        const face = `01001001 00100000 01010011 01000101 01000101 00100000 01011001 01001111 01010101`;
+        document.getElementById('top-left').innerText = face;
+        document.getElementById('top-right').innerText = face;
+        document.getElementById('bottom-left').innerText = face;
+        document.getElementById('bottom-right').innerText = face;
+
+        // --- LÓGICA DE NAVEGAÇÃO E INTERAÇÃO ---
+        
+        // Elementos do Terminal de Acesso
+        const terminalContainer = document.getElementById('terminal-container');
+        const loginSection = document.getElementById('login-section');
+        const intermediateSection = document.getElementById('intermediate-section');
+        const cameraSection = document.getElementById('camera-feed-container');
+        const cameraImageElement = document.getElementById('camera-image');
+        const continueButton = document.getElementById('continue-button');
+        const backToIntermediateButton = document.getElementById('back-to-intermediate-button');
+        
+        // Elementos da Página Hackers vs Crackers
+        const hackersCrackersPage = document.getElementById('hackers-crackers-page');
+        const goToHackersPageButton = document.getElementById('go-to-hackers-page-button'); // Botão na tela intermediária
+        const goToHackersPageFromCameraButton = document.getElementById('go-to-hackers-page-from-camera'); // Novo botão na tela da câmera
+        const backToTerminalButton = document.getElementById('back-to-terminal-button'); // Botão na página de Hackers vs Crackers
+
+        // Imagens da Câmera
+        const cameraImages = [
+            'https://via.placeholder.com/600x400?text=IMAGEM+1', // Substitua por suas imagens reais
+            'https://via.placeholder.com/600x400?text=IMAGEM+2', // Ex: 'imagens/foto1.jpg'
+            'https://via.placeholder.com/600x400?text=IMAGEM+3',
+            // Adicione mais fotos se quiser: 'imagens/foto4.jpg',
+        ];
+
+        let currentImageIndex = 0;
+        let cameraInterval;
+
+        // Função para mostrar a tela do Terminal
+        function showTerminal() {
+            hackersCrackersPage.style.display = 'none';
+            terminalContainer.style.display = 'flex';
+            loginSection.style.display = 'block';
+            intermediateSection.style.display = 'none';
+            cameraSection.style.display = 'none';
+            clearInterval(cameraInterval); // Para o intervalo da câmera se estiver rodando
+            document.body.style.overflow = 'hidden'; // Esconde a barra de rolagem
+        }
+
+        // Função para trocar a imagem da câmera
+        function changeCameraImage() {
+            cameraImageElement.src = cameraImages[currentImageIndex];
+            currentImageIndex = (currentImageIndex + 1) % cameraImages.length;
+        }
+
+        // Função para exibir a tela intermediária
+        function showIntermediateScreen(name, age, room) {
+            loginSection.style.display = 'none';
+            intermediateSection.style.display = 'flex';
+            document.getElementById('display-name').innerText = name.toUpperCase();
+            document.getElementById('display-age').innerText = age;
+            document.getElementById('display-room').innerText = room.toUpperCase();
+        }
+
+        // Função para iniciar a câmera
+        function startCameraFeed() {
+            intermediateSection.style.display = 'none';
+            cameraSection.style.display = 'flex'; // Use 'flex' para centralizar
+            changeCameraImage();
+            cameraInterval = setInterval(changeCameraImage, 2000);
+        }
+
+        // Função para mostrar a página Hackers vs Crackers
+        function showHackersCrackersPage() {
+            clearInterval(cameraInterval); // Para a câmera se estiver rodando
+            terminalContainer.style.display = 'none';
+            hackersCrackersPage.style.display = 'block';
+            document.body.style.overflow = 'auto'; // Mostra a barra de rolagem para o conteúdo da página
+        }
+
+        // Event Listeners
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && loginSection.style.display !== 'none') {
+                const name = document.getElementById('name').value;
+                const age = document.getElementById('age').value;
+                const room = document.getElementById('room').value;
+
+                if (name && age && room) {
+                    showIntermediateScreen(name, age, room);
+                } else {
+                    alert('ERRO: TODOS OS CAMPOS SAO OBRIGATORIOS.');
+                }
+            }
+        });
+
+        continueButton.addEventListener('click', startCameraFeed);
+        backToIntermediateButton.addEventListener('click', function() {
+            clearInterval(cameraInterval); // Para o intervalo da câmera
+            cameraSection.style.display = 'none';
+            intermediateSection.style.display = 'flex';
+        });
+
+        goToHackersPageButton.addEventListener('click', showHackersCrackersPage);
+        goToHackersPageFromCameraButton.addEventListener('click', showHackersCrackersPage);
+        backToTerminalButton.addEventListener('click', showTerminal);
+
+        // Inicializa a exibição para o terminal de login
+        showTerminal();
+    </script>
+
+</body>
+</html>
